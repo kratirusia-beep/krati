@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multimodal Attendance & Engagement Agent | Classroom Intelligence</title>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+    <!-- ================= Navigation Header ================= -->
+    <header class="navbar">
+        <div class="nav-brand">
+            <div class="brand-icon">🎓</div>
+            <div>
+                <h1 class="brand-title">Multimodal Attendance & Engagement Agent</h1>
+                <div class="brand-subtitle">
+                    AI Classroom Intelligence System
+                    <span class="pill-offline">● 100% Offline &amp; Privacy-Preserving</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="nav-controls">
+            <button id="btnToggleMode" class="btn btn-secondary">
+                Switch to Live Camera
+            </button>
+            <button id="btnEnrollModal" class="btn btn-emerald">
+                <span>+</span> Enroll Student
+            </button>
+            <button id="btnExportAttendance" class="btn btn-primary">
+                <span>📥</span> Export CSV
+            </button>
+            <button id="btnResetSession" class="btn btn-secondary" title="Reset current session">
+                <span>↺</span> Reset
+            </button>
+        </div>
+    </header>
+
+    <!-- ================= Main Dashboard ================= -->
+    <main class="dashboard-container">
+
+        <!-- 5 KPI Cards -->
+        <section class="kpi-grid">
+            <!-- KPI 1: Classroom Engagement -->
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <span class="kpi-label">Classroom Engagement</span>
+                    <span class="kpi-icon">⚡</span>
+                </div>
+                <div class="kpi-value-row">
+                    <span id="kpiEngagement" class="kpi-value">--</span>
+                    <span class="kpi-unit">%</span>
+                    <span id="kpiTrend" class="kpi-badge kpi-badge-neutral">STABLE</span>
+                </div>
+            </div>
+
+            <!-- KPI 2: Active Participants -->
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <span class="kpi-label">Active In Camera FOV</span>
+                    <span class="kpi-icon">👥</span>
+                </div>
+                <div class="kpi-value-row">
+                    <span id="kpiActiveStudents" class="kpi-value">--</span>
+                    <span class="kpi-unit">students</span>
+                </div>
+            </div>
+
+            <!-- KPI 3: Verified Present -->
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <span class="kpi-label">Sustained Present</span>
+                    <span class="kpi-icon">✅</span>
+                </div>
+                <div class="kpi-value-row">
+                    <span id="kpiVerifiedPresent" class="kpi-value">--</span>
+                    <span class="kpi-unit">verified</span>
+                </div>
+            </div>
+
+            <!-- KPI 4: Attendance Rate -->
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <span class="kpi-label">Attendance Rate</span>
+                    <span class="kpi-icon">📊</span>
+                </div>
+                <div class="kpi-value-row">
+                    <span id="kpiAttendanceRate" class="kpi-value">--%</span>
+                </div>
+            </div>
+
+            <!-- KPI 5: Acoustic Voice Activity -->
+            <div class="kpi-card">
+                <div class="kpi-header">
+                    <span class="kpi-label">Acoustic Activity</span>
+                    <span class="kpi-icon">🎙️</span>
+                </div>
+                <div class="kpi-value-row">
+                    <span id="vadStatus" class="kpi-badge kpi-badge-neutral">Monitoring...</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Main Workspace (Video + Suggestions) -->
+        <section class="main-grid">
+            
+            <!-- Left Column: Video & Dynamics -->
+            <div class="glass-panel">
+                <div class="panel-header">
+                    <h2 class="panel-title">
+                        <span>📹</span> Live Multimodal Tracking Feed
+                    </h2>
+                    <span id="fpsIndicator" class="kpi-badge kpi-badge-neutral">-- FPS</span>
+                </div>
+
+                <!-- Video Viewport -->
+                <div class="video-wrapper">
+                    <img id="liveVideoFeed" class="video-stream" src="/video_feed" alt="Classroom Multi-Face Tracking Feed">
+                    <div class="live-indicator">
+                        <div class="pulse-dot"></div>
+                        <span>LIVE INFERENCE</span>
+                    </div>
+                </div>
+
+                <!-- Acoustic Environment Status Bar -->
+                <div class="acoustic-bar-grid">
+                    <div>
+                        <div style="font-size: 0.75rem; color: #94a3b8; margin-bottom: 0.4rem; font-weight: 600;">ACOUSTIC CONTEXT</div>
+                        <span id="audioEnvChip" class="audio-env-chip">INITIALIZING...</span>
+                    </div>
+                    <div>
+                        <div style="font-size: 0.75rem; color: #94a3b8; margin-bottom: 0.4rem; font-weight: 600;">AUDIO SPECTRUM ENERGY</div>
+                        <div id="audioBarsContainer" class="audio-bars-container">
+                            <!-- Populated dynamically by app.js -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- State Distribution Progress -->
+                <div class="distribution-row">
+                    <div style="display: flex; justify-content: space-between; font-size: 0.8rem; font-weight: 600;">
+                        <span>Behavioral Distribution</span>
+                        <span style="color: #94a3b8;">Real-Time Visual Cues</span>
+                    </div>
+                    <div class="progress-stacked">
+                        <div id="progAttentive" class="prog-attentive" style="width: 50%;"></div>
+                        <div id="progNotes" class="prog-notes" style="width: 25%;"></div>
+                        <div id="progDistracted" class="prog-distracted" style="width: 15%;"></div>
+                        <div id="progDrowsy" class="prog-drowsy" style="width: 10%;"></div>
+                    </div>
+                    <div class="distribution-legend">
+                        <div class="legend-item"><span class="legend-dot" style="background:#10b981;"></span><span id="legendAttentive">Attentive: --%</span></div>
+                        <div class="legend-item"><span class="legend-dot" style="background:#38bdf8;"></span><span id="legendNotes">Taking Notes: --%</span></div>
+                        <div class="legend-item"><span class="legend-dot" style="background:#f59e0b;"></span><span id="legendDistracted">Distracted: --%</span></div>
+                        <div class="legend-item"><span class="legend-dot" style="background:#f43f5e;"></span><span id="legendDrowsy">Drowsy: --%</span></div>
+                    </div>
+                </div>
+
+                <!-- Engagement Timeline Graph -->
+                <div style="margin-top: 0.5rem;">
+                    <div style="font-size: 0.9rem; font-weight: 700; margin-bottom: 0.6rem;">Session Engagement Dynamics Timeline</div>
+                    <div style="height: 190px; position: relative;">
+                        <canvas id="engagementTimelineChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: AI Teaching Suggestions -->
+            <div class="glass-panel">
+                <div class="panel-header">
+                    <h2 class="panel-title">
+                        <span>🤖</span> AI Pedagogical Suggestions
+                    </h2>
+                    <span class="pill-offline">Agent Reasoning Core</span>
+                </div>
+
+                <p style="font-size: 0.82rem; color: #94a3b8; line-height: 1.45;">
+                    Real-time assistive decision-support engine. Evaluates visual attention drops, audio monologue pacing, fatigue clusters, and side chatter to recommend teaching interventions.
+                </p>
+
+                <!-- Dynamic Suggestions Feed -->
+                <div id="suggestionsFeed" class="suggestions-feed">
+                    <!-- Populated dynamically by app.js -->
+                </div>
+            </div>
+
+        </section>
+
+        <!-- Bottom Section: Verified Attendance Log & Roster -->
+        <section class="glass-panel">
+            <div class="panel-header">
+                <h2 class="panel-title">
+                    <span>📋</span> Automated Attendance Tracking (Sustained Presence Engine)
+                </h2>
+                <div style="font-size: 0.8rem; color: #94a3b8;">
+                    Filters momentary camera passage via temporal window threshold
+                </div>
+            </div>
+
+            <div class="table-wrapper">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Student ID</th>
+                            <th>Student Name</th>
+                            <th>Roll Number</th>
+                            <th>Department</th>
+                            <th>First Detected</th>
+                            <th>Presence Verification</th>
+                            <th>Avg Engagement</th>
+                            <th>Attendance Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="attendanceTableBody">
+                        <tr>
+                            <td colspan="8" style="text-align: center; padding: 2rem; color: #64748b;">
+                                Initializing student attendance logs...
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ================= Student Enrollment Modal ================= -->
+    <div id="enrollModal" class="modal-overlay">
+        <div class="modal-box">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-subtle); padding-bottom: 0.8rem;">
+                <h3 style="font-size: 1.1rem; font-weight: 700; color: white;">Enroll New Student</h3>
+                <button id="btnCloseModal" style="background: none; border: none; color: #94a3b8; font-size: 1.4rem; cursor: pointer;">&times;</button>
+            </div>
+
+            <form id="enrollStudentForm" style="display: flex; flex-direction: column; gap: 1rem;">
+                <div class="form-group">
+                    <label class="form-label" for="enrollId">Student ID *</label>
+                    <input class="form-input" type="text" id="enrollId" required placeholder="e.g. STU-107">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="enrollName">Full Name *</label>
+                    <input class="form-input" type="text" id="enrollName" required placeholder="e.g. Diya Sen">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="enrollRoll">Roll Number</label>
+                    <input class="form-input" type="text" id="enrollRoll" placeholder="e.g. CS2107">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="enrollDept">Department</label>
+                    <input class="form-input" type="text" id="enrollDept" value="Computer Science" placeholder="Department">
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="enrollPhoto">Reference Face Photo (Optional)</label>
+                    <input class="form-input" type="file" id="enrollPhoto" accept="image/*">
+                    <span style="font-size: 0.72rem; color: #64748b;">
+                        Biometric features are hashed locally via SHA-256 and never uploaded to any cloud server.
+                    </span>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 0.5rem;">
+                    <button type="submit" class="btn btn-emerald">Save &amp; Enroll</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Application Script -->
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

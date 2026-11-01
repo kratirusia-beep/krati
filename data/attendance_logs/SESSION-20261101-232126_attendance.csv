@@ -1,0 +1,11 @@
+Session ID,SESSION-20261101-232126
+Session Start,2026-11-01 23:21:26
+Attendance Rate,66.7%
+
+Student ID,Name,Roll No,Department,First Seen,Last Seen,Active Duration (Mins),Attendance Status,Sustained Verified,Avg Engagement (%)
+STU-101,Aarav Sharma,CS2101,Computer Science,2026-11-01 23:21:26,2026-11-01 23:21:43,0.3,PRESENT,YES,88.0
+STU-102,Priya Patel,CS2102,Computer Science,2026-11-01 23:21:26,2026-11-01 23:21:43,0.3,PRESENT,YES,82.0
+STU-103,Rohan Mehta,AI2103,Data Science & AI,2026-11-01 23:21:26,2026-11-01 23:21:43,0.3,PRESENT,YES,72.0
+STU-104,Ananya Rao,AI2104,Data Science & AI,2026-11-01 23:21:26,2026-11-01 23:21:43,0.3,PRESENT,YES,65.0
+STU-105,Vikram Singh,EC2105,Electronics,2026-11-01 23:21:26,2026-11-01 23:21:29,0.07,ABSENT,NO,50.0
+STU-106,Sneha Nair,CS2106,Computer Science,N/A,N/A,0.0,ABSENT,NO,0.0

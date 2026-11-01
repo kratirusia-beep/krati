@@ -1,0 +1,82 @@
+# =====================================================================
+# Multimodal Attendance & Engagement Agent - Configuration Settings
+# =====================================================================
+
+system:
+  app_name: "Multimodal Attendance & Engagement Agent"
+  version: "1.0.0"
+  offline_mode: true
+  privacy_preservation:
+    anonymize_biometrics: true
+    hash_algorithm: "sha256"
+    store_raw_photos: false
+    data_retention_days: 30
+
+vision:
+  # Detector can be 'opencv_haar' or 'opencv_yunet'
+  detector_backend: "opencv_haar"
+  min_face_size: [40, 40]
+  detection_confidence: 0.60
+  track_history_len: 30
+  max_missing_frames: 25
+  
+  # Head pose attention bounding limits (degrees)
+  head_pose:
+    yaw_limit: 28.0      # ±28 deg: Looking forward/board
+    pitch_min: -22.0     # Looking slightly down (notes) is acceptable up to -22 deg
+    pitch_max: 18.0      # Looking up
+    roll_limit: 25.0
+    
+  # Behavioral dynamics
+  inactivity:
+    stillness_threshold: 0.04    # Normalized optical motion below this is considered still
+    inactivity_alert_sec: 45.0  # Alert if stillness persists > 45 seconds
+    drowsiness_ear_threshold: 0.20  # Eye aspect ratio threshold for eye closure
+
+audio:
+  sample_rate: 16000
+  channels: 1
+  chunk_duration_sec: 1.0
+  device_index: null            # Default microphone
+  silence_rms_threshold: 0.015
+  voice_activity_threshold: 0.040
+  classroom_chatter_threshold: 0.090
+
+attendance:
+  # Sustained presence requirements
+  min_sustained_seconds: 15.0     # Must be detected consistently across at least 15s
+  sustained_ratio_threshold: 0.50 # Must be present in >= 50% of frames within window
+  session_grace_period_sec: 300   # 5 mins for "Late" classification
+  status_categories:
+    present: "PRESENT"
+    late: "LATE"
+    partial: "PARTIAL"
+    absent: "ABSENT"
+
+fusion:
+  interval_window_sec: 5.0        # Aggregation step for timeline metrics
+  weights:
+    visual_attention: 0.45        # Gaze & Head pose orientation
+    alertness_motion: 0.25        # Absence of drowsiness/prolonged stillness
+    acoustic_alignment: 0.30      # Audio context alignment (lecture vs discussion)
+  smoothing_factor: 0.35          # EMA factor for temporal stability
+
+agent_reasoning:
+  evaluation_interval_sec: 10.0   # How often the agent assesses classroom dynamics
+  rules:
+    attention_drop:
+      threshold_engagement: 45.0  # %
+      duration_sec: 15.0
+      suggestion: "Attention Dip Detected: Transition to an interactive think-pair-share or live question poll."
+    fatigue_cluster:
+      threshold_inactive_ratio: 0.35
+      suggestion: "Fatigue/Drowsiness Cluster: Consider a 60-second stand-and-stretch or call on students for brief input."
+    lecture_monologue:
+      max_speech_duration_sec: 600 # 10 minutes
+      suggestion: "Extended Monologue Alert: You have been lecturing for 10+ mins without student interaction. Pose a concept check question."
+    unwanted_chatter:
+      chatter_threshold: 0.10
+      suggestion: "Side-Chatter Alert: Elevated ambient chatter detected during focus interval. Refocus learner attention."
+    peak_engagement:
+      threshold_engagement: 80.0
+      suggestion: "Optimal Engagement Zone: Current delivery format is highly effective. Maintain current session pace."
